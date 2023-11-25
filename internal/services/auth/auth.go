@@ -9,7 +9,6 @@ import (
 	"sso/internal/domain/models"
 	"sso/internal/lib/jwt"
 	"sso/internal/storage"
-	"strconv"
 	"time"
 )
 
@@ -35,13 +34,14 @@ type UserProvider interface {
 }
 
 type AppProvider interface {
-	App(ctx context.Context, appID int) (models.App, error)
+	App(ctx context.Context, appID int32) (models.App, error)
 }
 
 var (
 	ErrInvalidCredentials = errors.New("invalidCredentials")
 	ErrInvalidAppId       = errors.New("invalid app id")
 	ErrUserExists         = errors.New("user already exists")
+	ErrUserNoExists       = errors.New("user does not exists")
 )
 
 // New returns new instance of the Auth service
@@ -61,13 +61,13 @@ func New(
 	}
 }
 
-func (a *Auth) Login(ctx context.Context, email string, pass string, appID int) (string, error) {
+func (a *Auth) Login(ctx context.Context, email string, pass string, appID int32) (string, error) {
 	const op = "auth.Login"
 
 	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", email), //careful with sensitive data!
-		slog.String("appID", strconv.Itoa(appID)),
+		slog.Int("appID", int(appID)),
 	)
 	log.Info("start user login")
 

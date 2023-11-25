@@ -2,10 +2,12 @@ package auth
 
 import (
 	"context"
+	"errors"
 	ssov1 "github.com/jasmanchik/protos/gen/go/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"sso/internal/services/auth"
 )
 
 const emptyValue = 0
@@ -45,6 +47,10 @@ func (s *serverAPI) Register(ctx context.Context, request *ssov1.RegisterRequest
 
 	userId, err := s.auth.RegisterNewUser(ctx, request.GetEmail(), request.GetPassword())
 	if err != nil {
+		if errors.Is(err, auth.ErrUserExists) {
+			return nil, status.Error(codes.AlreadyExists, "user exists")
+		}
+
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
@@ -58,6 +64,10 @@ func (s *serverAPI) IsAdmin(ctx context.Context, request *ssov1.IsAdminRequest) 
 
 	isAdmin, err := s.auth.IsAdmin(ctx, request.GetUserId())
 	if err != nil {
+		if errors.Is(err, auth.ErrUserNoExists) {
+			return nil, status.Error(codes.InvalidArgument, "invalid argument")
+		}
+
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
@@ -78,6 +88,10 @@ func (s *serverAPI) Login(ctx context.Context, request *ssov1.LoginRequest) (*ss
 
 	token, err := s.auth.Login(ctx, request.GetEmail(), request.GetPassword(), request.GetAppId())
 	if err != nil {
+		if errors.Is(err, auth.ErrInvalidCredentials) {
+			return nil, status.Error(codes.InvalidArgument, "invalid argument")
+		}
+
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
