@@ -1,0 +1,8 @@
+version: "3"
+
+tasks:
+  migrate:
+    desc: "Run project migrations"
+    cmds:
+      - go run cmd/migrator/main.go --storage-path=./storage/sso.db --migration-path=./migrations
+
