@@ -5,4 +5,8 @@ tasks:
     desc: "Run project migrations"
     cmds:
       - go run cmd/migrator/main.go --storage-path=./storage/sso.db --migration-path=./migrations
+  migrate-test:
+    desc: "Run project test migrations"
+    cmds:
+      - go run cmd/migrator/main.go --storage-path=./storage/sso.db --migration-path=./tests/migrations --migrations-table=migrations_test
 

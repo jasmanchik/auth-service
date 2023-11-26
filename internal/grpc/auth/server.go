@@ -89,7 +89,7 @@ func (s *serverAPI) Login(ctx context.Context, request *ssov1.LoginRequest) (*ss
 	token, err := s.auth.Login(ctx, request.GetEmail(), request.GetPassword(), request.GetAppId())
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
-			return nil, status.Error(codes.InvalidArgument, "invalid argument")
+			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
 		}
 
 		return nil, status.Error(codes.Internal, "internal error")
