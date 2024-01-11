@@ -81,12 +81,12 @@ func (s *Storage) User(ctx context.Context, email string) (models.User, error) {
 func (s *Storage) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	const op = "storage.sqlite.IsAdmin"
 
-	query, err := s.db.Prepare("select admins.user_id as is_admin from users left join admins on users.id = admins.user_id where users.id=? ")
+	query, err := s.db.Prepare("select admins.user_id is not null as is_admin from users left join admins on users.id = admins.user_id where users.id=? ")
 	if err != nil {
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
 	rows := query.QueryRowContext(ctx, userID)
-	var isAdmin bool
+	var isAdmin sql.NullBool
 	err = rows.Scan(&isAdmin)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -96,7 +96,7 @@ func (s *Storage) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return isAdmin, nil
+	return isAdmin.Valid && isAdmin.Bool, nil
 }
 
 func (s *Storage) App(ctx context.Context, appID int32) (models.App, error) {
